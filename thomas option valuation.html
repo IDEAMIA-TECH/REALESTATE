@@ -163,26 +163,48 @@ let formatter = new Intl.NumberFormat('en-US', {
 	for (row = 0; row < number_of_options; row++) {
          text+= "<tr>"; 
          
-         
-/* Get the data from the array and also merge the index data
-** Also, fix indexes where there isn't a latest index
-** fill variable to be able to calculate required metrics
-*/
-         effective_date =  fix_date ( Option_Listing.data[row]["Effective Date"] );        
+         // Validar que existan todos los campos necesarios
+         if (!Option_Listing.data[row] || 
+             !Option_Listing.data[row]["Effective Date"] ||
+             !Option_Listing.data[row]["Agreed Pct"] ||
+             !Option_Listing.data[row]["Initial Valuation"] ||
+             !Option_Listing.data[row]["Option Price"] ||
+             !Option_Listing.data[row]["TOTAL FEES"] ||
+             !Option_Listing.data[row]["Term"]) {
+             console.warn("Skipping row due to missing data:", row);
+             continue;
+         }
+
+         effective_date = fix_date(Option_Listing.data[row]["Effective Date"]);        
           
-         agreed_pct =  Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100; 
-         home_value_start =  Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")); 
-         option_price =  Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")); 
-         total_fees =  Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")); 
+         // Validar y convertir valores numéricos con valores por defecto
+         agreed_pct = Option_Listing.data[row]["Agreed Pct"] ? 
+             Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100 : 0;
+         home_value_start = Option_Listing.data[row]["Initial Valuation"] ? 
+             Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")) : 0;
+         option_price = Option_Listing.data[row]["Option Price"] ? 
+             Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")) : 0;
+         total_fees = Option_Listing.data[row]["TOTAL FEES"] ? 
+             Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")) : 0;
          
-         option_term = Option_Listing.data[row]["Term"];         
-    	 expiration_year =  Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term);
+         option_term = Option_Listing.data[row]["Term"] ? Number(Option_Listing.data[row]["Term"]) : 0;
          
-        
+         // Validar y calcular el año de expiración
+         let effectiveYear = 0;
+         try {
+             effectiveYear = Number(Option_Listing.data[row]["Effective Date"].split("/")[2]);
+         } catch (error) {
+             console.warn("Error parsing effective date year:", error);
+             effectiveYear = current_year;
+         }
+         expiration_year = effectiveYear + option_term;
+         
          theIndexToFind = (element) => element["observation_date"] === effective_date;
-		 my_start_index = Index_Information.data.findIndex( theIndexToFind );		 
-		 if( (my_start_index < 0) || (my_start_index === undefined ) ) { my_start_index = theLatestIndex-1; }
-		 		 
+         my_start_index = Index_Information.data.findIndex(theIndexToFind);		 
+         if ((my_start_index < 0) || (my_start_index === undefined)) { 
+             my_start_index = theLatestIndex-1; 
+         }
+         
          anchored_index_val = Number(Index_Information.data[my_start_index]["CSUSHPINSA"]).toFixed(3); 
          current_index_val = Number(Index_Information.data[theLatestIndex-1]["CSUSHPINSA"]).toFixed(3); 
      
