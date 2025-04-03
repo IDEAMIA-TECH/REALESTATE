@@ -472,13 +472,7 @@ function run_analysis( ) {
          Option_Listing.data[row]["MIN Home Value for No Return"] = formatter.format(min_home_value_full_payoff.toFixed(2)); 
          Option_Listing.data[row]["Calced Payoff"] = formatter.format(calced_payoff.toFixed(2)); 
          for ( column=0 ; column < headers.length ; column++ ) {         	
-               const value = Option_Listing.data[row][headers[column]];
-               // Reemplazar valores null, undefined o vacíos con un guión
-               if (value === null || value === undefined || value === "" || value === "null" || value === "undefined") {
-                   text+= "<td>-</td>";
-               } else {
-                   text+= "<td>" + value + "</td>"; 
-               }
+               text+= "<td>" + Option_Listing.data[row][headers[column]] + "</td>"; 
          }
         text+= "</tr>";
     }
