@@ -62,6 +62,10 @@
 
 
 function run_analysis( ) {
+    console.log("Starting run_analysis");
+    console.log("Index_Information:", Index_Information);
+    console.log("Option_Listing:", Option_Listing);
+
     let text = "";
     let top_text = "";
     let column = 0;
@@ -94,53 +98,56 @@ function run_analysis( ) {
     let option_price = 0;
     let theLatestIndex = Index_Information.data.length;
     let expiration_year = 0;
-	let option_term = 0;
+    let option_term = 0;
+
+    console.log("theLatestIndex:", theLatestIndex);
+    console.log("Index_Information.data[theLatestIndex-1]:", Index_Information.data[theLatestIndex-1]);
+
     if(  (Index_Information.data[theLatestIndex-1]["CSUSHPINSA"] === undefined ) ) {
+       console.log("Removing last index entry");
        Index_Information.data.pop( );
        theLatestIndex = Index_Information.data.length;
     }
     
-	let number_of_options = Option_Listing.data.length;
+    let number_of_options = Option_Listing.data.length;
+    console.log("number_of_options:", number_of_options);
+    console.log("Option_Listing.data[number_of_options-1]:", Option_Listing.data[number_of_options-1]);
+
     if(  (Option_Listing.data[number_of_options-1]["Client"] === undefined ) || (Option_Listing.data[number_of_options-1]["Client"].length < 5 ) ) {
+       console.log("Removing last option entry");
        Option_Listing.data.pop( );
        number_of_options = Option_Listing.data.length;
     }
 
-		let today = new Date();
-		/* var dd = String(today.getDate()).padStart(2, '0');
-		var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0! */
-		const current_year = today.getFullYear();
+    let today = new Date();
+    const current_year = today.getFullYear();
 
+    let formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2
+    });
 
-let formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2
-});
-/* formatter = new Intl.NumberFormat();    */
+    let headers = Option_Listing.meta.fields;
+    console.log("Headers:", headers);
+
+    headers.push("Index Anchor Date");
+    headers.push("Anchored Index");
+    headers.push("Current Index");
+    headers.push("Used Index Date");
+    headers.push("Index Difference");
+    headers.push("Implied Home Value");
+    headers.push("Implied Appreciation");
+    headers.push("Expiration Year");
+    headers.push("Share of Appreciation");
+    headers.push("Terminal Home Value");
+    headers.push("MIN Home Value for No Return");
+    headers.push("Calced Payoff");
+    headers.push("Option Valuation");
+    headers.splice( 17 , 2 );
+    headers.splice( 1 , 4 );
+    headers.splice( 6 , 3 );
     
-
-	let headers = Option_Listing.meta.fields;
-	headers.push("Index Anchor Date");
-	headers.push("Anchored Index");
-	headers.push("Current Index");
-	headers.push("Used Index Date");
-	headers.push("Index Difference");
-	headers.push("Implied Home Value");
-	headers.push("Implied Appreciation");
-	headers.push("Expiration Year");
-	headers.push("Share of Appreciation");
-	headers.push("Terminal Home Value");
-	headers.push("MIN Home Value for No Return");
-	headers.push("Calced Payoff");
-	headers.push("Option Valuation");
-/*	headers.push("ROI");
-	headers.push("Annualized Return");
-	headers.push("Valuation"); */
-	headers.splice( 17 , 2 );
-	headers.splice( 1 , 4 );
-	headers.splice( 6 , 3 );
-	
 
     text = "<H1>Options Information Table</H1>";
     text+= "<table>";
@@ -150,7 +157,7 @@ let formatter = new Intl.NumberFormat('en-US', {
     for ( column=0 ; column < headers.length ; column++ ) {
         text+= "<th>" + headers[column] + "</th>";
     }
-	text+= "</tr>";
+    text+= "</tr>";
 
 /*
 **
@@ -160,7 +167,9 @@ let formatter = new Intl.NumberFormat('en-US', {
 
 
 
-	for (row = 0; row < number_of_options; row++) {
+    for (row = 0; row < number_of_options; row++) {
+        console.log("Processing row:", row);
+        console.log("Option_Listing.data[row]:", Option_Listing.data[row]);
          text+= "<tr>"; 
          
          
@@ -170,10 +179,15 @@ let formatter = new Intl.NumberFormat('en-US', {
 */
          effective_date =  fix_date ( Option_Listing.data[row]["Effective Date"] );        
           
-         agreed_pct =  Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100; 
-         home_value_start =  Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")); 
-         option_price =  Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")); 
-         total_fees =  Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")); 
+         console.log("Agreed Pct:", Option_Listing.data[row]["Agreed Pct"]);
+         console.log("Initial Valuation:", Option_Listing.data[row]["Initial Valuation"]);
+         console.log("Option Price:", Option_Listing.data[row]["Option Price"]);
+         console.log("TOTAL FEES:", Option_Listing.data[row]["TOTAL FEES"]);
+         
+         agreed_pct = Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100;
+         home_value_start = Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,""));
+         option_price = Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,""));
+         total_fees = Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,""));
          
          option_term = Option_Listing.data[row]["Term"];         
     	 expiration_year =  Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term);
@@ -232,7 +246,7 @@ let formatter = new Intl.NumberFormat('en-US', {
                text+= "<td>" + Option_Listing.data[row][headers[column]] + "</td>"; 
          }
         text+= "</tr>";
-	}
+    }
     text+= "</table>";
     
     top_text = "<h1> Overview </h1>";
