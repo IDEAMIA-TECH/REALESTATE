@@ -262,8 +262,14 @@ function run_analysis( ) {
     top_text += "<p> Cumulative Initial Price (nexus of control) --> " + formatter.format(Number(cumulative_initial_price).toFixed(2)) + "</p>";
     top_text += "<p> Cumulative Share --> " + formatter.format(Number(cumulative_share).toFixed(2)) + "</p>";
     top_text += "<p> Cumulative Investment + Fees --> " + formatter.format(Number(cumulative_investment).toFixed(2)) + "</p>";
-    top_text += "<p> Apparent Return (needs work) --> " + Number(cumulative_share / cumulative_investment).toFixed(2) + "</p>";
-    top_text += "<p> Cumulative Payoff (needs work) --> " + formatter.format(Number(cumulative_payoff).toFixed(2)) + "</p>";
+    
+    // Add validation for division by zero
+    let apparent_return = cumulative_investment !== 0 ? (cumulative_share / cumulative_investment).toFixed(2) : "0.00";
+    top_text += "<p> Apparent Return (needs work) --> " + apparent_return + "</p>";
+    
+    // Ensure cumulative_payoff is a valid number
+    let formatted_payoff = isNaN(cumulative_payoff) ? 0 : cumulative_payoff;
+    top_text += "<p> Cumulative Payoff (needs work) --> " + formatter.format(Number(formatted_payoff).toFixed(2)) + "</p>";
 
 	document.getElementById("my_output").innerHTML =  top_text + text;
 
