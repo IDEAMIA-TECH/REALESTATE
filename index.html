@@ -395,40 +395,50 @@ function run_analysis( ) {
         total_fees = Option_Listing.data[row]["TOTAL FEES"] ? 
             Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")) : 0;
          
-         option_term = Option_Listing.data[row]["Term"];         
-    	 expiration_year =  Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term);
+        option_term = Option_Listing.data[row]["Term"] ? Number(Option_Listing.data[row]["Term"]) : 0;         
+        expiration_year = Option_Listing.data[row]["Effective Date"] ? 
+            Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term) : current_year;
          
-        
-         theIndexToFind = (element) => element["observation_date"] === effective_date;
-		 my_start_index = Index_Information.data.findIndex( theIndexToFind );		 
-		 if( (my_start_index < 0) || (my_start_index === undefined ) ) { my_start_index = theLatestIndex-1; }
+        theIndexToFind = (element) => element["observation_date"] === effective_date;
+        my_start_index = Index_Information.data.findIndex(theIndexToFind);		 
+        if ((my_start_index < 0) || (my_start_index === undefined)) { my_start_index = theLatestIndex-1; }
 		 		 
-         anchored_index_val = Number(Index_Information.data[my_start_index]["CSUSHPINSA"]).toFixed(3); 
-         current_index_val = Number(Index_Information.data[theLatestIndex-1]["CSUSHPINSA"]).toFixed(3); 
+        anchored_index_val = Number(Index_Information.data[my_start_index]["CSUSHPINSA"]).toFixed(3); 
+        current_index_val = Number(Index_Information.data[theLatestIndex-1]["CSUSHPINSA"]).toFixed(3); 
      
-/* 
-**    This section, work on calculating key variables
-**
-*/   
+        // Validate values before calculations
+        if (isNaN(anchored_index_val) || anchored_index_val <= 0) {
+            console.warn(`Invalid anchored index value for row ${row}: ${anchored_index_val}`);
+            anchored_index_val = 1; // Prevent division by zero
+        }
+        if (isNaN(current_index_val)) {
+            console.warn(`Invalid current index value for row ${row}: ${current_index_val}`);
+            current_index_val = anchored_index_val; // Use anchored value as fallback
+        }
+        if (isNaN(agreed_pct) || agreed_pct <= 0) {
+            console.warn(`Invalid agreed percentage for row ${row}: ${agreed_pct}`);
+            agreed_pct = 0.01; // Set a small default value
+        }
          
-         index_difference = (current_index_val > anchored_index_val) ? current_index_val - anchored_index_val : 0; 
-         home_value_now =  home_value_start / anchored_index_val * current_index_val;
-         total_appreciation = home_value_now - home_value_start;
-         total_appreciation = total_appreciation > 0 ? total_appreciation : 0;
-    	 share_appreciation = total_appreciation *  agreed_pct; 
-    	 cumulative_share += share_appreciation;
-    	 cumulative_investment += (total_fees + option_price);
-    	 cumulative_initial_price += home_value_start;
-    	 calced_payoff = ( total_fees * 2 ) + option_price + share_appreciation;
+        index_difference = (current_index_val > anchored_index_val) ? current_index_val - anchored_index_val : 0; 
+        home_value_now = home_value_start / anchored_index_val * current_index_val;
+        total_appreciation = home_value_now - home_value_start;
+        total_appreciation = total_appreciation > 0 ? total_appreciation : 0;
+        share_appreciation = total_appreciation * agreed_pct; 
+        cumulative_share += share_appreciation;
+        cumulative_investment += (total_fees + option_price);
+        cumulative_initial_price += home_value_start;
+        calced_payoff = (total_fees * 2) + option_price + share_appreciation;
     	 
-    	 terminal_home_value = home_value_now * ((1 + yearly_appreciation_estimate) ** ( expiration_year - current_year ));
-    	 terminal_appreciation = terminal_home_value - home_value_now;
-    	 terminal_appreciation_share = terminal_appreciation * agreed_pct;
+        terminal_home_value = home_value_now * ((1 + yearly_appreciation_estimate) ** (expiration_year - current_year));
+        terminal_appreciation = terminal_home_value - home_value_now;
+        terminal_appreciation_share = terminal_appreciation * agreed_pct;
     	 
-    	 calced_payoff = terminal_appreciation_share + (total_fees * 2) + option_price + share_appreciation;
-     	 cumulative_payoff += calced_payoff;
-	   	 min_home_value_full_payoff = (((total_fees * 2) + option_price ) / agreed_pct) + home_value_start;
-    	 option_value = calced_payoff / (( 1 + investment_discount_rate ) ** ( expiration_year - current_year ) );
+        calced_payoff = terminal_appreciation_share + (total_fees * 2) + option_price + share_appreciation;
+        cumulative_payoff += calced_payoff;
+        min_home_value_full_payoff = agreed_pct > 0 ? 
+            (((total_fees * 2) + option_price) / agreed_pct) + home_value_start : home_value_start;
+        option_value = calced_payoff / ((1 + investment_discount_rate) ** (expiration_year - current_year));
     	 
 /*
 **  Here, move the variables into the array for printing out.
