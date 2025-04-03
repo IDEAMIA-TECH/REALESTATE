@@ -257,6 +257,11 @@ function run_analysis( ) {
     }
     text+= "</table>";
     
+    // Add debug logs before calculations
+    console.log("cumulative_share:", cumulative_share);
+    console.log("cumulative_investment:", cumulative_investment);
+    console.log("cumulative_payoff:", cumulative_payoff);
+    
     top_text = "<h1> Overview </h1>";
     top_text += "<p> Number of Options --> " + number_of_options + "</p>";
     top_text += "<p> Cumulative Initial Price (nexus of control) --> " + formatter.format(Number(cumulative_initial_price).toFixed(2)) + "</p>";
