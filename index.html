@@ -534,14 +534,33 @@ function run_analysis( ) {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    Index_Information = Papa.parse(e.target.result, { header: true });
-                    if (Index_Information.errors.length > 0) {
-                        showNotification('Error loading Home Price Index Data', 'error');
-                    } else {
-                        showNotification('Home Price Index Data loaded successfully');
+                    try {
+                        Index_Information = Papa.parse(e.target.result, { 
+                            header: true,
+                            skipEmptyLines: true,
+                            trimHeaders: true,
+                            dynamicTyping: true
+                        });
+                        
+                        console.log("Parsed Index Data:", Index_Information);
+                        
+                        if (Index_Information.errors && Index_Information.errors.length > 0) {
+                            console.error("CSV Parsing Errors:", Index_Information.errors);
+                            showNotification(`Error loading Home Price Index Data: ${Index_Information.errors[0].message}`, 'error');
+                        } else if (!Index_Information.data || Index_Information.data.length === 0) {
+                            showNotification('Home Price Index file is empty', 'error');
+                        } else if (!Index_Information.meta || !Index_Information.meta.fields) {
+                            showNotification('Invalid Home Price Index file format', 'error');
+                        } else {
+                            showNotification('Home Price Index Data loaded successfully');
+                        }
+                    } catch (error) {
+                        console.error("Error parsing Index file:", error);
+                        showNotification('Error parsing Home Price Index file: ' + error.message, 'error');
                     }
                 };
-                reader.onerror = function() {
+                reader.onerror = function(error) {
+                    console.error("File reading error:", error);
                     showNotification('Error reading Home Price Index file', 'error');
                 };
                 reader.readAsText(file);
@@ -553,14 +572,33 @@ function run_analysis( ) {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    Option_Listing = Papa.parse(e.target.result, { header: true });
-                    if (Option_Listing.errors.length > 0) {
-                        showNotification('Error loading Options data', 'error');
-                    } else {
-                        showNotification('Options data loaded successfully');
+                    try {
+                        Option_Listing = Papa.parse(e.target.result, { 
+                            header: true,
+                            skipEmptyLines: true,
+                            trimHeaders: true,
+                            dynamicTyping: true
+                        });
+                        
+                        console.log("Parsed Options Data:", Option_Listing);
+                        
+                        if (Option_Listing.errors && Option_Listing.errors.length > 0) {
+                            console.error("CSV Parsing Errors:", Option_Listing.errors);
+                            showNotification(`Error loading Options data: ${Option_Listing.errors[0].message}`, 'error');
+                        } else if (!Option_Listing.data || Option_Listing.data.length === 0) {
+                            showNotification('Options file is empty', 'error');
+                        } else if (!Option_Listing.meta || !Option_Listing.meta.fields) {
+                            showNotification('Invalid Options file format', 'error');
+                        } else {
+                            showNotification('Options data loaded successfully');
+                        }
+                    } catch (error) {
+                        console.error("Error parsing Options file:", error);
+                        showNotification('Error parsing Options file: ' + error.message, 'error');
                     }
                 };
-                reader.onerror = function() {
+                reader.onerror = function(error) {
+                    console.error("File reading error:", error);
                     showNotification('Error reading Options file', 'error');
                 };
                 reader.readAsText(file);
