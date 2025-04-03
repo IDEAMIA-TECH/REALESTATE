@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valuation Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
 	<script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>	    
 	<style>
         body {
@@ -276,10 +276,11 @@ let formatter = new Intl.NumberFormat('en-US', {
 
 
 function fix_date( in_date ) {
+    if (!in_date) return "";
     let out_date = "";
-    const split_date = in_date.split("/")
+    const split_date = in_date.split("/");
+    if (split_date.length < 3) return "";
     out_date = split_date[2] +  "-" + split_date[0].toString().padStart(2 , '0') + "-01";    
-    
     return out_date;
 }
          
