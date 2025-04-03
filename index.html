@@ -170,24 +170,32 @@ function run_analysis( ) {
     for (row = 0; row < number_of_options; row++) {
         console.log("Processing row:", row);
         console.log("Option_Listing.data[row]:", Option_Listing.data[row]);
-         text+= "<tr>"; 
-         
-         
-/* Get the data from the array and also merge the index data
-** Also, fix indexes where there isn't a latest index
-** fill variable to be able to calculate required metrics
-*/
-         effective_date =  fix_date ( Option_Listing.data[row]["Effective Date"] );        
-          
-         console.log("Agreed Pct:", Option_Listing.data[row]["Agreed Pct"]);
-         console.log("Initial Valuation:", Option_Listing.data[row]["Initial Valuation"]);
-         console.log("Option Price:", Option_Listing.data[row]["Option Price"]);
-         console.log("TOTAL FEES:", Option_Listing.data[row]["TOTAL FEES"]);
-         
-         agreed_pct = Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100;
-         home_value_start = Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,""));
-         option_price = Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,""));
-         total_fees = Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,""));
+        
+        // Skip empty rows
+        if (!Option_Listing.data[row] || !Option_Listing.data[row]["Client"] || Option_Listing.data[row]["Client"].trim() === "") {
+            console.log("Skipping empty row:", row);
+            continue;
+        }
+        
+        text+= "<tr>"; 
+        
+        effective_date = fix_date(Option_Listing.data[row]["Effective Date"]);
+        console.log("effective_date:", effective_date);
+        
+        console.log("Agreed Pct:", Option_Listing.data[row]["Agreed Pct"]);
+        console.log("Initial Valuation:", Option_Listing.data[row]["Initial Valuation"]);
+        console.log("Option Price:", Option_Listing.data[row]["Option Price"]);
+        console.log("TOTAL FEES:", Option_Listing.data[row]["TOTAL FEES"]);
+        
+        // Add null checks and default values
+        agreed_pct = Option_Listing.data[row]["Agreed Pct"] ? 
+            Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100 : 0;
+        home_value_start = Option_Listing.data[row]["Initial Valuation"] ? 
+            Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")) : 0;
+        option_price = Option_Listing.data[row]["Option Price"] ? 
+            Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")) : 0;
+        total_fees = Option_Listing.data[row]["TOTAL FEES"] ? 
+            Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")) : 0;
          
          option_term = Option_Listing.data[row]["Term"];         
     	 expiration_year =  Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term);
