@@ -60,6 +60,52 @@
         .export-btn:hover {
             background-color: #45a049;
         }
+        .overview-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 250px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-title {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .card-value {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .card-description {
+            color: #666;
+            font-size: 12px;
+            font-style: italic;
+        }
+        .highlight-card {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+        }
+        .highlight-card .card-title,
+        .highlight-card .card-value,
+        .highlight-card .card-description {
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -297,22 +343,67 @@ function run_analysis( ) {
     console.log("cumulative_investment:", cumulative_investment);
     console.log("cumulative_payoff:", cumulative_payoff);
     
-    top_text = "<h1> Overview </h1>";
-    top_text += "<p> Number of Options --> " + number_of_options + "</p>";
-    top_text += "<p> Cumulative Initial Price (nexus of control) --> " + formatter.format(Number(cumulative_initial_price).toFixed(2)) + "</p>";
-    top_text += "<p> Cumulative Share --> " + formatter.format(Number(cumulative_share).toFixed(2)) + "</p>";
-    top_text += "<p> Cumulative Investment + Fees --> " + formatter.format(Number(cumulative_investment).toFixed(2)) + "</p>";
+    top_text = '<div class="overview-container">';
     
-    // Add validation for division by zero
+    // Number of Options Card
+    top_text += `
+        <div class="card">
+            <div class="card-title">Number of Options</div>
+            <div class="card-value">${number_of_options}</div>
+            <div class="card-description">Total options analyzed</div>
+        </div>
+    `;
+    
+    // Cumulative Initial Price Card
+    top_text += `
+        <div class="card">
+            <div class="card-title">Cumulative Initial Price</div>
+            <div class="card-value">${formatter.format(Number(cumulative_initial_price).toFixed(2))}</div>
+            <div class="card-description">Total initial valuation</div>
+        </div>
+    `;
+    
+    // Cumulative Share Card
+    top_text += `
+        <div class="card">
+            <div class="card-title">Cumulative Share</div>
+            <div class="card-value">${formatter.format(Number(cumulative_share).toFixed(2))}</div>
+            <div class="card-description">Total share value</div>
+        </div>
+    `;
+    
+    // Cumulative Investment Card
+    top_text += `
+        <div class="card">
+            <div class="card-title">Cumulative Investment</div>
+            <div class="card-value">${formatter.format(Number(cumulative_investment).toFixed(2))}</div>
+            <div class="card-description">Total investment + fees</div>
+        </div>
+    `;
+    
+    // Apparent Return Card
     let apparent_return = cumulative_investment !== 0 ? (cumulative_share / cumulative_investment).toFixed(2) : "0.00";
-    top_text += "<p> Apparent Return (needs work) --> " + apparent_return + "</p>";
+    top_text += `
+        <div class="card highlight-card">
+            <div class="card-title">Apparent Return</div>
+            <div class="card-value">${apparent_return}x</div>
+            <div class="card-description">Return on investment</div>
+        </div>
+    `;
     
-    // Ensure cumulative_payoff is a valid number
+    // Cumulative Payoff Card
     let formatted_payoff = isNaN(cumulative_payoff) ? 0 : cumulative_payoff;
-    top_text += "<p> Cumulative Payoff (needs work) --> " + formatter.format(Number(formatted_payoff).toFixed(2)) + "</p>";
-
-	document.getElementById("my_output").innerHTML =  top_text + text;
-
+    top_text += `
+        <div class="card highlight-card">
+            <div class="card-title">Cumulative Payoff</div>
+            <div class="card-value">${formatter.format(Number(formatted_payoff).toFixed(2))}</div>
+            <div class="card-description">Total expected payoff</div>
+        </div>
+    `;
+    
+    top_text += '</div>'; // Close overview-container
+    
+    document.getElementById("my_output").innerHTML = top_text + text;
 }
 
 /*
