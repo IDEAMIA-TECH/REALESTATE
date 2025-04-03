@@ -24,8 +24,41 @@
             margin: auto;
             margin-bottom: 40px;
         }
-        td {
-           text-align: right;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .export-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px;
+        }
+        .export-btn:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -40,6 +73,8 @@
     <input type="file" name="fileINDEXInput" id="fileINDEXInput" accept=".csv">
     <br>
    <input type="button" onclick="run_analysis()" value="I like big buttons and I cannot lie">
+   
+   <button class="export-btn" onclick="exportToExcel()">Export to Excel</button>
    
    <div id="my_output">
    </div>
@@ -317,6 +352,62 @@ function fix_date( in_date ) {
     return out_date;
 }
          
+    function exportToExcel() {
+        if (!Option_Listing || !Option_Listing.data || Option_Listing.data.length === 0) {
+            alert("No data to export. Please run the analysis first.");
+            return;
+        }
+
+        // Create a CSV string
+        let csv = [];
+        
+        // Add headers
+        let headers = Option_Listing.meta.fields;
+        headers.push("Index Anchor Date");
+        headers.push("Anchored Index");
+        headers.push("Current Index");
+        headers.push("Used Index Date");
+        headers.push("Index Difference");
+        headers.push("Implied Home Value");
+        headers.push("Implied Appreciation");
+        headers.push("Expiration Year");
+        headers.push("Share of Appreciation");
+        headers.push("Terminal Home Value");
+        headers.push("MIN Home Value for No Return");
+        headers.push("Calced Payoff");
+        headers.push("Option Valuation");
+        headers.splice(17, 2);
+        headers.splice(1, 4);
+        headers.splice(6, 3);
+        
+        csv.push(headers.join(','));
+
+        // Add data rows
+        for (let row = 0; row < Option_Listing.data.length; row++) {
+            if (!Option_Listing.data[row] || !Option_Listing.data[row]["Client"] || Option_Listing.data[row]["Client"].trim() === "") {
+                continue;
+            }
+
+            let rowData = [];
+            for (let header of headers) {
+                let value = Option_Listing.data[row][header] || '';
+                // Remove any commas from the value to prevent CSV formatting issues
+                value = value.toString().replace(/,/g, '');
+                rowData.push(value);
+            }
+            csv.push(rowData.join(','));
+        }
+
+        // Create download link
+        let csvContent = "data:text/csv;charset=utf-8," + csv.join('\n');
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "option_valuation_data.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
     </script>
 
 </body>
