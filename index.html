@@ -62,6 +62,16 @@
 
 
 function run_analysis( ) {
+    // Add validation checks at the start
+    if (!Index_Information || !Index_Information.data || Index_Information.data.length === 0) {
+        alert("Please load the Home Price Index Data file first");
+        return;
+    }
+    if (!Option_Listing || !Option_Listing.data || Option_Listing.data.length === 0) {
+        alert("Please load the Options Google Sheet file first");
+        return;
+    }
+
     let text = "";
     let top_text = "";
     let column = 0;
@@ -95,15 +105,17 @@ function run_analysis( ) {
     let theLatestIndex = Index_Information.data.length;
     let expiration_year = 0;
 	let option_term = 0;
-    if(  (Index_Information.data[theLatestIndex-1]["CSUSHPINSA"] === undefined ) ) {
-       Index_Information.data.pop( );
-       theLatestIndex = Index_Information.data.length;
+
+    // Add validation for data structure
+    if (!Index_Information.data[theLatestIndex-1] || !Index_Information.data[theLatestIndex-1]["CSUSHPINSA"]) {
+        alert("Invalid Home Price Index Data format");
+        return;
     }
     
 	let number_of_options = Option_Listing.data.length;
-    if(  (Option_Listing.data[number_of_options-1]["Client"] === undefined ) || (Option_Listing.data[number_of_options-1]["Client"].length < 5 ) ) {
-       Option_Listing.data.pop( );
-       number_of_options = Option_Listing.data.length;
+    if (!Option_Listing.data[number_of_options-1] || !Option_Listing.data[number_of_options-1]["Client"]) {
+        alert("Invalid Options data format");
+        return;
     }
 
 		let today = new Date();
@@ -170,10 +182,15 @@ let formatter = new Intl.NumberFormat('en-US', {
 */
          effective_date =  fix_date ( Option_Listing.data[row]["Effective Date"] );        
           
-         agreed_pct =  Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100; 
-         home_value_start =  Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")); 
-         option_price =  Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")); 
-         total_fees =  Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")); 
+         // Add null checks for string values before calling replace
+         agreed_pct = Option_Listing.data[row]["Agreed Pct"] ? 
+             Number(Option_Listing.data[row]["Agreed Pct"].replace(/[^0-9.-]+/g,""))/100 : 0;
+         home_value_start = Option_Listing.data[row]["Initial Valuation"] ? 
+             Number(Option_Listing.data[row]["Initial Valuation"].replace(/[^0-9.-]+/g,"")) : 0;
+         option_price = Option_Listing.data[row]["Option Price"] ? 
+             Number(Option_Listing.data[row]["Option Price"].replace(/[^0-9.-]+/g,"")) : 0;
+         total_fees = Option_Listing.data[row]["TOTAL FEES"] ? 
+             Number(Option_Listing.data[row]["TOTAL FEES"].replace(/[^0-9.-]+/g,"")) : 0;
          
          option_term = Option_Listing.data[row]["Term"];         
     	 expiration_year =  Number(Option_Listing.data[row]["Effective Date"].split("/")[2]) + Number(option_term);
