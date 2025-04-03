@@ -329,43 +329,30 @@ function run_analysis( ) {
     let headers = Option_Listing.meta.fields;
     console.log("Headers:", headers);
 
-    // Solo agregar campos adicionales si los datos existen
-    if (Index_Information && Index_Information.data && Index_Information.data.length > 0) {
-        headers.push("Index Anchor Date");
-        headers.push("Anchored Index");
-        headers.push("Current Index");
-        headers.push("Used Index Date");
-        headers.push("Index Difference");
-        headers.push("Implied Home Value");
-        headers.push("Implied Appreciation");
-        headers.push("Expiration Year");
-        headers.push("Share of Appreciation");
-        headers.push("Terminal Home Value");
-        headers.push("MIN Home Value for No Return");
-        headers.push("Calced Payoff");
-        headers.push("Option Valuation");
-    }
-
-    // Filtrar headers para eliminar campos vacíos o indefinidos
-    headers = headers.filter(header => {
-        return Option_Listing.data.some(row => 
-            row[header] !== undefined && 
-            row[header] !== null && 
-            row[header] !== "" && 
-            row[header] !== "undefined"
-        );
-    });
-
-    // Eliminar campos específicos solo si existen
-    if (headers.includes("ROI")) headers.splice(headers.indexOf("ROI"), 1);
-    if (headers.includes("Annualized Return")) headers.splice(headers.indexOf("Annualized Return"), 1);
-    if (headers.includes("Valuation")) headers.splice(headers.indexOf("Valuation"), 1);
+    headers.push("Index Anchor Date");
+    headers.push("Anchored Index");
+    headers.push("Current Index");
+    headers.push("Used Index Date");
+    headers.push("Index Difference");
+    headers.push("Implied Home Value");
+    headers.push("Implied Appreciation");
+    headers.push("Expiration Year");
+    headers.push("Share of Appreciation");
+    headers.push("Terminal Home Value");
+    headers.push("MIN Home Value for No Return");
+    headers.push("Calced Payoff");
+    headers.push("Option Valuation");
+    headers.splice( 17 , 2 );
+    headers.splice( 1 , 4 );
+    headers.splice( 6 , 3 );
+    
 
     text = "<H1>Options Information Table</H1>";
     text+= "<table>";
 
     text+= "<tr>";
-    for (column = 0; column < headers.length; column++) {
+
+    for ( column=0 ; column < headers.length ; column++ ) {
         text+= "<th>" + headers[column] + "</th>";
     }
     text+= "</tr>";
